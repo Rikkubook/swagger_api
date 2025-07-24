@@ -6,10 +6,10 @@ const swaggerOptions = {
     info: {
       title: 'Cart API',
       version: '1.0.0',
-       description: 'API documentation for my system', // ✅ info 物件是必填！
+       description: 'API documentation for my system', 
     },
   },
-  apis: [__dirname + '/../router/*.js'], // ✅ 修正這裡！
+  apis: [__dirname + '/../router/*.js'],
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);

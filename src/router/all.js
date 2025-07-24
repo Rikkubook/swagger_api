@@ -29,7 +29,7 @@ router.get('/', cartController.getCart);
 
 /**
  * @swagger
- * /shopping:
+ * /cart/shoppingCart:
  *   get:
  *     summary: Get shipping cart by userId
  *     parameters:
@@ -38,7 +38,7 @@ router.get('/', cartController.getCart);
  *         required: true
  *         schema:
  *           type: string
- *         description: User ID to fetch cart
+ *         description: User ID to fetch cart，提供測試用 '8a8fff61-7e98-423a-b07f-43ead8312d63'; 
  *     responses:
  *       200:
  *         description: Success
