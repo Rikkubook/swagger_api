@@ -1,8 +1,8 @@
 // ...existing code...
+const jwt = require('jsonwebtoken');
 
-
-require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
+require('dotenv').config();
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_KEY;
@@ -10,11 +10,11 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 
 exports.getShoppingCart = async (req, res) => {
-  // 取得 userId，優先使用 query string
-  const userId = req.query.userId;
-  // const userId = 'fc38c888-5318-4f18-bda9-a1156582c860'; // 可改為 req.query.userId
+  const userId = req.user.userId; // 直接從 middleware 取得
+
   if (!userId) return res.status(400).json({ error: 'Missing userId' });
 
+  // 1. 取得購物車DB
   let { data: cartData, error } = await supabase
     .from('carts')
     .select(`
@@ -34,11 +34,12 @@ exports.getShoppingCart = async (req, res) => {
         )
       )
     `)
-    .eq('user_id', userId).single();
+    .eq('user_id', userId).maybeSingle();
 
   if (error) return res.status(500).json({ error: error.message });
   if (!cartData || cartData.length === 0) return res.status(404).json({ error: 'Cart not found' });
 
+  // 2. 取得所有項目，整理過
   const cartItems = (cartData?.cart_items || []).map(item => ({
     productId: item.skus?.products?.product_id || '',
     productName: item.skus?.products?.name || '',
@@ -64,11 +65,45 @@ exports.getShoppingCart = async (req, res) => {
   res.json(cart);
 };
 
-exports.getCart = async (req, res) => {
-  const userId = req.query.userId || 'demo-user-id'; // 可根據需求調整
-  if (!userId) return res.status(400).json({ error: 'Missing userId' });
+exports.changeShoppingCart = async (req, res) => {
+  const userId = req.user.userId; // 直接從 middleware 取得
+  const { skuId, quantity } = req.body;
+  console.log(skuId, quantity)
 
-  let { data: cartData, error } = await supabase
+  if (!userId) return res.status(400).json({ error: 'Missing userId' });
+  if (!skuId || typeof quantity !== 'number') {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  // 1. 找使用者的出購物車
+  const { data: cartData, error: cartError } = await supabase
+    .from('carts')
+    .select('cart_id')
+    .eq('user_id', userId)
+    .single();
+
+  if (cartError || !cartData) {
+    return res.status(404).json({ error: 'Cart not found' });
+  }
+
+  const cartId = cartData.cart_id;
+
+  // 2.找出對應的商品
+  const { data: skuData, error: skuError } = await supabase
+    .from('cart_items')
+    .update({ quantity })
+    .eq('cart_id', cartId)
+    .eq('sku_id', skuId)
+    .select() // 要求回傳
+    .single();
+
+  console.log(skuData)
+  if (skuError) {
+    return res.status(500).json({ error: 'Failed to update cart item', detail: updateError.message });
+  }
+
+  // 3.重整購物車
+  let { data: newCartData, newCartError } = await supabase
     .from('carts')
     .select(`
       cart_id,
@@ -87,12 +122,10 @@ exports.getCart = async (req, res) => {
         )
       )
     `)
-    .eq('user_id', userId);
+    .eq('user_id', userId).maybeSingle();
 
-  if (error) return res.status(500).json({ error: error.message });
-  if (!cartData || cartData.length === 0) return res.status(404).json({ error: 'Cart not found' });
-
-  const cartItems = (cartData[0]?.cart_items || []).map(item => ({
+  // 4. 取得所有項目，整理過
+  const cartItems = (newCartData?.cart_items || []).map(item => ({
     productId: item.skus?.products?.product_id || '',
     productName: item.skus?.products?.name || '',
     skuId: item.sku_id || '',
@@ -107,45 +140,13 @@ exports.getCart = async (req, res) => {
   cartItems.forEach((item) => { cartItemTotalPrice += item.subtotal });
 
   const cart = {
-    cart_id: cartData[0]?.cart_id,
-    created_at: cartData[0]?.created_at,
-    cart_items: cartItems,
+    cart_id: newCartData?.cart_id,
+    created_at: newCartData?.created_at,
+    cart_items: newCartData,
     total: cartItemTotalPrice,
     grandTotal: cartItemTotalPrice + 60
   };
 
-  res.json(cart);
+  res.status(200).json(cart);
 };
 
-exports.changeShoppingCart = async (req, res) => {
-  // 取得 userId，優先使用 query string
-  const userId = req.query.userId;
-  const updateData = req.body;
-  console.log(updateData)
-
-  if (!userId) return res.status(400).json({ error: 'Missing userId' });
-
-  const { data: cartData, error: cartError } = await supabase
-    .from('carts')
-    .select('cart_id')
-    .eq('user_id', userId)
-    .single();
-
-  if (cartError || !cartData) {
-    return res.status(404).json({ error: 'Cart not found' });
-  }
-
-  const cartId = cartData.cart_id;
-
-  res.status(201).json(cartData);
-};
-
-exports.removeItem = async (req, res) => {
-  const { id } = req.params;
-  const { error } = await supabase
-    .from('cart_items')
-    .delete()
-    .eq('id', id);
-  if (error) return res.status(500).json({ error: error.message });
-  res.json({ message: 'Item removed' });
-};
