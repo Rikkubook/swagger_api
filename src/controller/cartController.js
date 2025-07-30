@@ -9,6 +9,31 @@ const supabaseKey = process.env.SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 
+function formatCart(cartData) {
+  const cartItems = (cartData?.cart_items || []).map(item => ({
+    productId: item.skus?.products?.product_id || '',
+    productName: item.skus?.products?.name || '',
+    skuId: item.sku_id || '',
+    skuName: item.skus?.name || '',
+    quantity: item.quantity,
+    price: item.skus?.price ? Number(item.skus.price) : 0,
+    subtotal: item.quantity * (item.skus?.price ? Number(item.skus.price) : 0),
+    imageUrl: item.skus?.image_url || ''
+  }));
+
+  let cartItemTotalPrice = 0;
+  cartItems.forEach((item) => { cartItemTotalPrice += item.subtotal });
+
+  return {
+    cart_id: cartData?.cart_id,
+    created_at: cartData?.created_at,
+    cart_items: cartItems,
+    total: cartItemTotalPrice,
+    grandTotal: cartItemTotalPrice + 60
+  };
+}
+
+
 exports.getShoppingCart = async (req, res) => {
   const userId = req.user.userId; // 直接從 middleware 取得
 
@@ -40,28 +65,7 @@ exports.getShoppingCart = async (req, res) => {
   if (!cartData || cartData.length === 0) return res.status(404).json({ error: 'Cart not found' });
 
   // 2. 取得所有項目，整理過
-  const cartItems = (cartData?.cart_items || []).map(item => ({
-    productId: item.skus?.products?.product_id || '',
-    productName: item.skus?.products?.name || '',
-    skuId: item.sku_id || '',
-    skuName: item.skus?.name || '',
-    quantity: item.quantity,
-    price: item.skus?.price ? Number(item.skus.price) : 0,
-    subtotal: item.quantity * (item.skus?.price ? Number(item.skus.price) : 0),
-    imageUrl: item.skus?.image_url || ''
-  }));
-
-  let cartItemTotalPrice = 0;
-  cartItems.forEach((item) => { cartItemTotalPrice += item.subtotal });
-
-  const cart = {
-    cart_id: cartData?.cart_id,
-    created_at: cartData?.created_at,
-    cart_items: cartItems,
-    total: cartItemTotalPrice,
-    grandTotal: cartItemTotalPrice + 60
-  };
-
+  const cart = formatCart(cartData)
   res.json(cart);
 };
 
@@ -125,27 +129,8 @@ exports.changeShoppingCart = async (req, res) => {
     .eq('user_id', userId).maybeSingle();
 
   // 4. 取得所有項目，整理過
-  const cartItems = (newCartData?.cart_items || []).map(item => ({
-    productId: item.skus?.products?.product_id || '',
-    productName: item.skus?.products?.name || '',
-    skuId: item.sku_id || '',
-    skuName: item.skus?.name || '',
-    quantity: item.quantity,
-    price: item.skus?.price ? Number(item.skus.price) : 0,
-    subtotal: item.quantity * (item.skus?.price ? Number(item.skus.price) : 0),
-    imageUrl: item.skus?.image_url || ''
-  }));
-
-  let cartItemTotalPrice = 0;
-  cartItems.forEach((item) => { cartItemTotalPrice += item.subtotal });
-
-  const cart = {
-    cart_id: newCartData?.cart_id,
-    created_at: newCartData?.created_at,
-    cart_items: newCartData,
-    total: cartItemTotalPrice,
-    grandTotal: cartItemTotalPrice + 60
-  };
+    // 2. 取得所有項目，整理過
+  const cart = formatCart(newCartData)
 
   res.status(200).json(cart);
 };

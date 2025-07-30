@@ -99,4 +99,5 @@ router.get('/shoppingCart', authMiddleware, cartController.getShoppingCart);
 router.patch('/shoppingCart', authMiddleware, cartController.changeShoppingCart);
 
 
+
 module.exports = router;
