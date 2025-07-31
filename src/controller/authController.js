@@ -13,12 +13,13 @@ const JWT_SECRET = process.env.JWT_SECRET ;
 exports.register = async (req, res) => {
   const errors = validationResult(req); // 
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+    const errorMessage = errors.array().map(error => error.msg).join('，');
+    return res.status(400).json({ errorCode: 'badRequest' , message: errorMessage });
   }
 
   const { email, password, checkPassword } = req.body;
   if (password !== checkPassword){
-    return res.status(400).json({ error: '帳號密碼不合' });
+    return res.status(400).json({ errorCode: 'badRequest' , message: '帳號密碼不合' });
   }
 
   try {
@@ -30,7 +31,7 @@ exports.register = async (req, res) => {
 
     if (existError) throw new Error(existError.message);
     if (existUser.length > 0) {
-      return res.status(409).json({ error: '此帳號已註冊' });
+      return res.status(409).json({ errorCode: 'conflict' , error: '此帳號已註冊' });
     }
 
     // 2. 密碼加鹽加密
@@ -51,17 +52,19 @@ exports.register = async (req, res) => {
       user: { email: data[0].email},
     });
   } catch (err) {
-    res.status(500).json({ error: 'Registration failed: ' + err.message });
+    res.status(500).json({ 
+      errorCode: 'internalServerError',   
+      message: '註冊失敗，請稍後再試',  
+      debug: err.message
+    });
   }
 };
 
 exports.login = async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password) return res.status(400).json({ error: 'Missing email or password' });
-
-  const errors = validationResult(req);
+  const errors = validationResult(req); // 
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+        const errorMessage = errors.array().map(error => error.msg).join('，');
+    return res.status(400).json({ errors: errorMessage });
   }
 
   try {
