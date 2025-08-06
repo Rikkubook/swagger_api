@@ -9,12 +9,6 @@ const app = express();
 
 app.use(express.json());
 
-// 修正點：手動 serve Swagger UI 靜態檔案
-app.use(
-  '/api-docs',
-  express.static(path.join(__dirname, '../node_modules/swagger-ui-dist'))
-);
-
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use('/api/auth', authRouter);
