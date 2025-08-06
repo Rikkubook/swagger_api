@@ -23,10 +23,8 @@ app.get('/swagger.json', (req, res) => {
   res.send(swaggerSpec);
 });
 
-// Swagger UI 頁面
-// Swagger UI 頁面 - 簡化版本
+// Swagger UI 頁面 - 直接內嵌規格
 app.get('/api-docs', (req, res) => {
-  const baseUrl = req.protocol + '://' + req.get('host');
   res.send(`
     <!DOCTYPE html>
     <html>
@@ -46,8 +44,9 @@ app.get('/api-docs', (req, res) => {
       <script src="https://unpkg.com/swagger-ui-dist@3.52.5/swagger-ui-bundle.js"></script>
       <script>
         window.onload = function() {
+          const swaggerSpec = ${JSON.stringify(swaggerSpec)};
           SwaggerUIBundle({
-            url: '${baseUrl}/swagger.json',
+            spec: swaggerSpec,  // 👈 直接使用規格物件，不需要網路請求
             dom_id: '#swagger-ui',
             presets: [
               SwaggerUIBundle.presets.apis,
