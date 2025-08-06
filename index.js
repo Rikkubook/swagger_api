@@ -8,7 +8,35 @@ const app = express();
 
 app.use(express.json());
 
-app.get('/api-docs', (req, res) => res.send('Swagger ready'));
+// app.get('/api-docs', (req, res) => res.send('Swagger ready'));
+
+app.get('/swagger.json', (req, res) => {
+   console.log('GET /swagger.json triggered');
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
+
+app.get('/api-docs', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Swagger UI</title>
+      <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist/swagger-ui.css" />
+    </head>
+    <body>
+      <div id="swagger-ui"></div>
+      <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
+      <script>
+        SwaggerUIBundle({
+          url: '/swagger.json',
+          dom_id: '#swagger-ui',
+        });
+      </script>
+    </body>
+    </html>
+  `);
+});
 
 // app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 

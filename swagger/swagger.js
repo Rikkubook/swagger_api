@@ -1,5 +1,6 @@
 const swaggerJsdoc = require('swagger-jsdoc');
 
+
 const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
@@ -30,6 +31,8 @@ token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4YThmZmY2MS03ZTk4LTQy
   },
   apis: [__dirname + '/../router/*.js'],
 };
+
+//pis: [__dirname + '/../router/*.js'],
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
