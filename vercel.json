@@ -1,0 +1,12 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "你的 API 文件",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://swagger-api-seven.vercel.app"
+    }
+  ]
+}
