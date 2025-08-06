@@ -137,7 +137,7 @@ router.post('/register', [
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Login succes
+ *                   example: 登入成功
  *                 token:
  *                   type: string
  *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlZDgxZGViMi1mY2FmLTQwZjEtODBmNi03N2I4YzdmNzdlMzQiLCJlbWFpbCI6InV
@@ -154,9 +154,38 @@ router.post('/register', [
  *             schema:
  *               type: object
  *               properties:
- *                 error:
+ *                 errorCode:
  *                   type: string
- *                   example: Email 格式錯誤
+ *                   example: badRequest
+ *                 message:
+ *                   type: string
+ *                   example: Email 不可為空
+ *       401:
+ *         description: 未通過認證
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 errorCode:
+ *                   type: string
+ *                   example: conflict
+ *                 message:
+ *                   type: string
+ *                   example: 查無帳號
+ *       500:
+ *         description: 系統錯誤
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 errorCode:
+ *                   type: string
+ *                   example: internalServerError
+ *                 message:
+ *                   type: string
+ *                   example: 登入失敗，請稍後再試
  */
 router.post('/login', [
     body('email')

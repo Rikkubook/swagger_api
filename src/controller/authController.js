@@ -31,7 +31,7 @@ exports.register = async (req, res) => {
 
     if (existError) throw new Error(existError.message);
     if (existUser.length > 0) {
-      return res.status(409).json({ errorCode: 'conflict' , error: '此帳號已註冊' });
+      return res.status(409).json({ errorCode: 'conflict' , message: '此帳號已註冊' });
     }
 
     // 2. 密碼加鹽加密
@@ -64,9 +64,11 @@ exports.login = async (req, res) => {
   const errors = validationResult(req); // 
   if (!errors.isEmpty()) {
         const errorMessage = errors.array().map(error => error.msg).join('，');
-    return res.status(400).json({ errors: errorMessage });
+    return res.status(400).json({ errorCode: 'badRequest' , message: errorMessage });
   }
 
+  const { email, password } = req.body;
+  
   try {
     // 1. 查找使用者
     const { data: userData, error } = await supabase
@@ -75,11 +77,11 @@ exports.login = async (req, res) => {
       .eq('email', email) // 條件
       .single();
 
-    if (error || !userData) return res.status(401).json({ error: 'User not found' });
+    if (error || !userData) return res.status(401).json({ errorCode: 'userNotFound' , message: '查無帳號' });
 
     // 2. 比對密碼
     const isMatch = await bcrypt.compare(password, userData.password);
-    if (!isMatch) return res.status(401).json({ error: 'Wrong password' });
+    if (!isMatch) return res.status(401).json({ errorCode: 'userNotFound' , message: '查無帳號' });
 
     // 3. 產生 JWT token
     const token = jwt.sign(
@@ -95,9 +97,13 @@ exports.login = async (req, res) => {
     });
 
     // 5. 回應
-    res.status(200).json({ message: 'Login success', token, user: { id: userData.id, email: userData.email } });
+    res.status(200).json({ message: '登入成功', token, user: { id: userData.id, email: userData.email } });
 
   } catch (err) {
-    res.status(500).json({ error: 'Login failed: ' + err.message });
+    res.status(500).json({ 
+      errorCode: 'internalServerError',   
+      message: '登入失敗，請稍後再試',  
+      debug: err.message
+    });
   }
 };
