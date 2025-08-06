@@ -8,19 +8,19 @@
   ],
   "routes": [
     {
-      "src": "^/$",
-      "status": 302,
-      "headers": {
-        "Location": "/api-docs"
-      }
-    },
-    {
       "src": "/api-docs",
       "dest": "/src/index.js"
     },
     {
       "src": "/api/.*",
       "dest": "/src/index.js"
+    },
+    {
+      "src": "^/$",
+      "status": 302,
+      "headers": {
+        "Location": "/api-docs"
+      }
     }
   ]
 }
