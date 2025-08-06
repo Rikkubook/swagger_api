@@ -1,12 +1,15 @@
 {
-  "openapi": "3.0.0",
-  "info": {
-    "title": "你的 API 文件",
-    "version": "1.0.0"
-  },
-  "servers": [
+  "version": 2,
+  "builds": [
     {
-      "url": "https://swagger-api-seven.vercel.app"
+      "src": "index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api-docs",
+      "dest": "/index.js"
     }
   ]
 }
