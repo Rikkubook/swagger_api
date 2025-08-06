@@ -14,13 +14,6 @@
     {
       "src": "/api/.*",
       "dest": "/src/index.js"
-    },
-    {
-      "src": "^/$",
-      "status": 302,
-      "headers": {
-        "Location": "/api-docs"
-      }
     }
   ]
 }
