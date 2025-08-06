@@ -1,5 +1,6 @@
 
 const express = require('express');
+const serverless = require('serverless-http'); 
 const swaggerUi = require('swagger-ui-express');
 const { swaggerSpec } = require('./swagger/swagger');
 const allRouter = require('./router/cart');
@@ -19,4 +20,4 @@ app.use('/api/cart', allRouter);
 //   console.log(`Swagger UI available at http://localhost:${PORT}/api-docs`);
 // });
 
-module.exports = app;
+module.exports = serverless(app);
