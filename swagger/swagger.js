@@ -1,5 +1,5 @@
 const swaggerJsdoc = require('swagger-jsdoc');
-
+const path = require('path'); 
 
 const swaggerOptions = {
   definition: {
@@ -29,7 +29,11 @@ token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4YThmZmY2MS03ZTk4LTQy
       },
     },
   },
-  apis: [__dirname + '/../router/*.js'],
+  // 修改這裡的路徑設定
+  apis: [
+    path.join(__dirname, '../router/*.js'),
+    './router/*.js'  // 備用路徑
+  ],
 };
 
 //pis: [__dirname + '/../router/*.js'],
