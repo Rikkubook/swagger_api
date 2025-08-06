@@ -8,7 +8,18 @@
   ],
   "routes": [
     {
+      "src": "^/$",
+      "status": 302,
+      "headers": {
+        "Location": "/api-docs"
+      }
+    },
+    {
       "src": "/api-docs",
+      "dest": "/index.js"
+    },
+    {
+      "src": "/api/.*",
       "dest": "/index.js"
     }
   ]

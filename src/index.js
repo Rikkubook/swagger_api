@@ -13,8 +13,10 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api/auth', authRouter);
 app.use('/api/cart', allRouter);
 
-const PORT = process.env.PORT || 3100;
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-  console.log(`Swagger UI available at http://localhost:${PORT}/api-docs`);
-});
+// const PORT = process.env.PORT || 3100;
+// app.listen(PORT, () => {
+//   console.log(`Server running on http://localhost:${PORT}`);
+//   console.log(`Swagger UI available at http://localhost:${PORT}/api-docs`);
+// });
+
+module.exports = app;
