@@ -16,11 +16,11 @@
     },
     {
       "src": "/api-docs",
-      "dest": "/index.js"
+      "dest": "/src/index.js"
     },
     {
       "src": "/api/.*",
-      "dest": "/index.js"
+      "dest": "/src/index.js"
     }
   ]
 }
